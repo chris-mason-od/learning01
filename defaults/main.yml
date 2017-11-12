@@ -1,0 +1,32 @@
+# userid that Tomcat will run as
+tomcat_userid: "tomcat"
+
+# groupid that Tomcat will run as
+tomcat_groupid: "tomcat"
+
+# Tomcat installation base path
+local_apps: "/local/apps"
+
+# Tomcat installation instance path
+tomcat_instance_path: "{{ local_apps }}/{{tomcat_userid }}"
+
+# Tomcat instance ports
+tomcat_http_port: "25000"
+tomcat_ssl_port: "25100"
+tomcat_ajp_port: "25200"
+tomcat_ajp_redirect_port: "25210"
+tomcat_cluster_membership_port: "25300"
+tomcat_cluster_receiver_port: "25400"
+tomcat_shutdown_port: "25500"
+tomcat_jmx_remote_port: "25600"
+
+# Tomcat jvmRoute
+tomcat_jvmroute: "node01"
+
+# JVM options for Tomcat instance
+tomcat_jvm_properties: "-Xms512m -Xmx512m -XX:+UseG1GC -XX:ParallelGCThreads=4 -XX:ConcGCThreads=2 -XX:MaxGCPauseMillis=400"
+
+# Tomcat SSL key variables
+tomcat_keystore_file=tomcat.jks
+tomcat_keystore_password=tomcat
+tomcat_key_alias=tomcatkey

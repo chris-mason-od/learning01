@@ -1,0 +1,10 @@
+#!/bin/sh
+# 
+# Created by: Christopher Mason - Atos Product Engineering
+# Version: 8.0.45
+# Purpose: Tomcat Environment Settings
+#
+# JMX Remote Monitoring
+export CATALINA_OPTS="$CATALINA_OPTS -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port={{ tomcat_jmx_remote_port }} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+#
+export CATALINA_OPTS="$CATALINA_OPTS {{ tomcat_jvm_properties }}"

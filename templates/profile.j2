@@ -1,0 +1,9 @@
+# Tomcat User Environment Variables
+
+export CATALINA_BASE="{{ local_apps }}/{{ tomcat_userid }}"
+
+export JAVA_HOME="{{ local_apps }}/{{ tomcat_userid }}/java"
+
+export TOMCAT_USER="{{ tomcat_userid }}"
+
+export PATH=$JAVA_HOME/bin:$PATH

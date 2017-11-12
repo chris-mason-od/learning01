@@ -1,0 +1,84 @@
+#
+#
+- name: repo_add_dev_app
+  yum_repository:
+   name: mhfi_dev_repo_APP
+   description: Repo server for development env APP
+   file: spglobal.repos
+   baseurl: http://10.206.129.129/dev/RHEL/7/applications/x86_64
+   gpgcheck: no
+
+- name: Install Apache-Tomcat RPM
+  yum: name=Apache-Tomcat enablerepo=mhfi_dev_repo_APP state=latest installroot="{{ tomcat_instance_path }}"
+  tags: yum_install
+
+- name: Create application groupid for Tomcat instance
+  group:
+    name="{{ tomcat_groupid }}"
+    state=present
+    system=no
+
+- name: Create application userid for Tomcat instance
+  user:
+    name="{{ tomcat_userid }}"
+    state=present
+    system=no
+    shell=/bin/bash
+    group="{{ tomcat_groupid }}"
+    home="{{ tomcat_instance_path }}"
+    createhome=yes
+    skeleton=yes
+    generate_ssh_key=yes
+
+- name: Template .profile to Tomcat user home directory
+  template:
+    src: profile.j2
+    dest="{{ tomcat_instance_path }}/.profile"
+    mode=0755
+    owner="{{ tomcat_userid }}"
+    group="{{ tomcat_groupid }}"
+
+- name: Template setenv.sh to ./bin directory
+  template:
+    src: setenv.sh.j2
+    dest="{{ tomcat_instance_path }}/bin/setenv.sh"
+    mode=0755
+    owner="{{ tomcat_userid }}"
+    group="{{ tomcat_groupid }}"
+
+- name: Template server.xml to ./conf directory
+  template:
+    src: server.xml.j2
+    dest="{{ tomcat_instance_path }}/conf/server.xml"
+    mode=0644
+    owner="{{ tomcat_userid }}"
+    group="{{ tomcat_groupid }}"
+
+- name: Template systemd config file for this Tomcat instance
+  template:
+    src=tomcat.service.j2
+    dest="/etc/systemd/system/{{ tomcat_userid }}.service"
+    mode=0644
+    owner="root"
+    group="root"
+
+- name: Generate SSL key and store
+  shell: keytool -genkey -noprompt -alias {{tomcat_key_alias}} -keyalg RSA -validity 3650 -dname "CN=*.mhf.mhc, OU=Infrastructure, O=SPGI, L=New York, S=NY, C=US" -keystore {{tomcat_instance_path}}/ssl/{{tomcat_keystore_file}} -storepass {{tomcat_keystore_password}} -keypass {{tomcat_keystore_password}}
+    become: true
+    become_method: su
+    become_user: {{ tomcat_userid }}
+    become_flags: '-s /bin/sh'
+  
+- name: Enable Tomcat instance as a service and Stop it
+  systemd:
+    name: "{{ tomcat_userid }}.service"
+    state: stopped
+    enabled: yes
+    daemon_reload: yes
+
+- name: Enable Tomcat instance as a service and Start it
+  systemd:
+    name: "{{ tomcat_userid }}.service"
+    state: started
+    enabled: yes
+    daemon_reload: yes
